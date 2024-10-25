@@ -1,0 +1,41 @@
+/* App.css */
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f9f9f9;
+}
+
+.login-container {
+  display: flex;
+  
+  align-items: center;
+  justify-content: center;
+  background: white;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+.text-section {
+  text-align: left;
+  
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #0057b7; /* 로고 색상 변경 */
+  margin-bottom: 20px;
+}
+
+.platform-name {
+  color: #0066ff; /* 플랫폼 이름 색상 */
+  font-weight: bold;
+}
+
+
+
+
