@@ -7,22 +7,22 @@ import { axiosClient } from '../../../utils/axiosClient';
 import { useGroup } from '../../../contexts/GroupContext';
 
 function FriendInviteTab({ friends, search, onSearchChange, onInvite }) {
-  const { id } = useGroup();
+  const { groupId } = useGroup();
 
-  const handleInviteClick = (index) => {
-    const friend = friends[index];
+  const handleInviteClick = (friendId) => {
+    const friend = friends.find((m) => m.id === friendId)
 
     // GET 요청을 보냄
     axiosClient.get('/room/join/request', {
       params: {
-        roomId: id,
+        roomId: groupId,
         nick: friend.nick
       }
     })
     .then(response => {
       console.log('초대 요청 성공:', response.data);
       sendInvite(friend.id, `${friend.nick}님을 초대했습니다.`);
-      onInvite(index); // 성공하면 초대 상태 업데이트
+      onInvite(friend.id,'friend'); // 성공하면 초대 상태 업데이트
     })
     .catch(error => {
       console.error('초대 요청 실패:', error);
@@ -63,7 +63,7 @@ function FriendInviteTab({ friends, search, onSearchChange, onInvite }) {
                     <CheckCircleIcon color="success" />
                   </IconButton>
                 ) : (
-                  <IconButton edge="end" onClick={() => handleInviteClick(index)}>
+                  <IconButton edge="end" onClick={() => handleInviteClick(friend.id)}>
                     <AddIcon />
                   </IconButton>
                 )

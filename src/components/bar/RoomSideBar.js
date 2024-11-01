@@ -1,58 +1,81 @@
-import { AccountCircle, VideoCall, PersonAdd } from "@mui/icons-material";
-import { Avatar, Box, Button, List, ListItem, Typography } from "@mui/material";
+import { AccountCircle, VideoCall, PersonAdd, ArrowBack } from "@mui/icons-material";
+import { Avatar, Box, Button, IconButton, List, ListItem, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import InviteModal from "../group/InviteModal";
 import { useGroup } from "../../contexts/GroupContext";
-import { axiosClient } from "../../utils/axiosClient"; // axios 인스턴스 불러오기
+import { axiosClient } from "../../utils/axiosClient";
+import { useGroupNotification } from "../../contexts/GroupNotificationContext";
 
 function RoomSideBar() {
-    const { id } = useGroup();
-    let roomId = id;
-
+    const { groupId, setRtype } = useGroup();
     const [friends, setFriends] = useState([]);
     const [inviteModalOpen, setInviteModalOpen] = useState(false);
+    const { invitationCount } = useGroupNotification();
+    const {rtype} = useGroup();
+ 
+    const navigate = useNavigate();
 
-    // API 요청을 통해 방 인원 정보 가져오기
     useEffect(() => {
         const fetchRoomDetails = async () => {
             try {
-                const response = await axiosClient.get(`/room/detail/${roomId}`);
-                setFriends(response.data.members); // API 응답 데이터를 상태에 저장
+                const response = await axiosClient.get(`/room/detail/${groupId}`);
+                setFriends(response.data.members);
             } catch (error) {
                 console.error("Error fetching room details:", error);
             }
         };
 
         fetchRoomDetails();
-    }, [roomId]); // roomId가 변경될 때마다 다시 API 요청
+    }, [groupId, invitationCount]);
 
     const handleVideoCall = () => {
         window.open('/video', '_blank', 'noopener,noreferrer');
     };
 
+    const handleCollapse = () => {
+        setRtype(null);
+        navigate('/'); // 바로 경로 이동
+    };
+
     return (
-        <Box sx={{ width: 300, bgcolor: '#3C3D37', p: 2, height: '100vh', display: 'flex', flexDirection: 'column' }}>
-            <Typography color={"white"} variant="h6" noWrap>
-                방 인원
-            </Typography>
+        <Box
+            sx={{
+                width: 300,
+                bgcolor: '#3C3D37',
+                p: 2,
+                height: '100vh',
+                display: 'flex',
+                flexDirection: 'column',
+                position: 'relative',
+                overflow: 'hidden',
+            }}
+        >
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography color="white" variant="h6" noWrap>
+                    방 인원
+                </Typography>
+                <IconButton onClick={handleCollapse} sx={{ color: 'white' }}>
+                    <ArrowBack />
+                </IconButton>
+            </Box>
             <List sx={{ flex: 1, overflowY: 'auto', mt: 2 }}>
                 {friends.map((friend, index) => (
                     <ListItem key={index} button sx={{ display: 'flex', alignItems: 'center' }}>
-                       <Avatar src={friend.profile} sx={{ mr: 2 }} />
+                        <Avatar src={friend.profile} sx={{ mr: 2 }} />
                         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                            <Typography color={"white"} sx={{ fontSize: "15px" }}>
+                            <Typography color="white" sx={{ fontSize: "15px" }}>
                                 {friend.nick}
                             </Typography>
-                            <Typography color={"white"} variant="caption">
+                            <Typography color="white" variant="caption">
                                 {friend.status}
                             </Typography>
                         </Box>
                     </ListItem>
                 ))}
             </List>
-            
-            {/* 하단 버튼들 */}
             <Box sx={{ p: 1, display: 'flex', justifyContent: 'space-between' }}>
+            {rtype !== 'dm' && (
                 <Button
                     variant="contained"
                     startIcon={<PersonAdd />}
@@ -61,6 +84,7 @@ function RoomSideBar() {
                 >
                     그룹초대
                 </Button>
+           )}
                 <Button
                     variant="contained"
                     startIcon={<VideoCall />}
@@ -70,7 +94,6 @@ function RoomSideBar() {
                     화상회의
                 </Button>
             </Box>
-
             <InviteModal open={inviteModalOpen} onClose={() => setInviteModalOpen(false)} />
         </Box>
     );

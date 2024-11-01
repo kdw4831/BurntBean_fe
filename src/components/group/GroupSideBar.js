@@ -5,13 +5,15 @@ import { useEffect, useState } from "react";
 import { axiosClient } from "../../utils/axiosClient";
 import { useNavigate } from 'react-router-dom'; // useNavigate 가져오기
 import { useGroup } from "../../contexts/GroupContext";
+import { useGroupNotification } from "../../contexts/GroupNotificationContext";
 
 function GroupSideBar() {
     const [groupList, setGroupList] = useState([]);
     const [openModal, setOpenModal] = useState(false);
     const [newGroupName, setNewGroupName] = useState("");
     const navigate = useNavigate(); 
-    const { setId, setGroupName, setTotal } = useGroup(); 
+    const { setGroupId, setGroupName, setTotal, setRtype, setMembers } = useGroup(); 
+    const {invitationCount } = useGroupNotification();
 
     // 그룹 데이터를 가져오는 함수
     const fetchGroups = async () => {
@@ -26,7 +28,8 @@ function GroupSideBar() {
 
     useEffect(() => {
         fetchGroups(); // 컴포넌트가 처음 렌더링될 때 그룹 데이터를 가져옴
-    }, []);
+        console.log("초대횟수"+ invitationCount)
+    }, [invitationCount]);
 
     // 그룹 추가 모달 열기/닫기 핸들러
     const handleOpenModal = () => setOpenModal(true);
@@ -47,9 +50,12 @@ function GroupSideBar() {
     // 그룹 avatar 클릭 핸들러
     const handleGroupClick = async(groupId) => {
         const res= await axiosClient.get(`/room/detail/${groupId}`)
-        setId(res.data.id)
+        console.log(res.data)
+        setGroupId(res.data.id)
         setGroupName(res.data.groupName)
         setTotal(res.data.total)
+        setRtype(res.data.rtype)
+        setMembers(res.data.members)
         navigate(`/chat`); // 그룹 ID를 포함하여 ChatRoom으로 이동
     };
 

@@ -22,7 +22,7 @@ const NickInputModal = () => {
   const [nick, setNickname] = useState('');
   const [birth, setBirthdate] = useState(dayjs());
   const [isNicknameAvailable, setIsNicknameAvailable] = useState(null); // null로 초기화
-  const { setId, setNick, setName } = useMember(); // MemberContext의 setter 함수를 가져옴
+  const { setMeId, setNick, setName } = useMember(); // MemberContext의 setter 함수를 가져옴
 
 
   const handleModalSubmit = async () => {
@@ -41,7 +41,7 @@ const NickInputModal = () => {
       const memberData = await axiosClient.get('/member/get_me');
 
       const { id, nick, name } = memberData.data;
-      setId(id);
+      setMeId(id);
       setNick(nick);
       setName(name);
     } catch (error) {

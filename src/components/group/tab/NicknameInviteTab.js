@@ -1,9 +1,46 @@
 // NicknameInviteTab.js
 import React from 'react';
-import { Box, TextField, Button, List, ListItem, ListItemText, IconButton, Chip } from '@mui/material';
+import { List, ListItem, ListItemText, IconButton, TextField, ListItemAvatar, Avatar } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { axiosClient } from '../../../utils/axiosClient';
+import { useGroup } from '../../../contexts/GroupContext';
 
-function NicknameInviteTab({ search, onSearchChange, onInvite, filteredNicknames, invitedNicknames }) {
+function NicknameInviteTab({ members, search, onSearchChange, onInvite }) {
+  const { groupId } = useGroup();
+  
+  const handleInviteClick = (memberId) => {
+    const member = members.find((m) => m.id === memberId);
+  
+    axiosClient.get('/room/join/request', {
+      params: {
+        roomId: groupId,
+        nick: member.nick
+      }
+    })
+    .then(response => {
+      console.log('초대 요청 성공:', response.data);
+      sendInvite(member.id, `${member.nick}님을 초대했습니다.`);
+      onInvite(member.id, 'member'); // 성공 시 식별자를 기반으로 초대 상태 업데이트
+    })
+    .catch(error => {
+      console.error('초대 요청 실패:', error);
+    });
+  };
+  
+  const sendInvite = async (inviteeId, message) => {
+    try {
+        await axiosClient.post(`/invite/send/${inviteeId}`, message, {
+          headers: {
+            'Content-Type': 'text/plain'
+          }
+        });
+        console.log("초대 알림 전송 성공");
+    } catch (error) {
+        console.error("초대 알림 전송 실패:", error);
+    }
+  };
+
   return (
     <>
       <TextField
@@ -14,38 +51,32 @@ function NicknameInviteTab({ search, onSearchChange, onInvite, filteredNicknames
         onChange={(e) => onSearchChange(e.target.value)}
         sx={{ mb: 2 }}
       />
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={onInvite}
-        disabled={!search || invitedNicknames.includes(search)}
-        sx={{ mb: 2 }}
-      >
-        초대
-      </Button>
-      <Box sx={{ mt: 2 }}>
-        {filteredNicknames.length > 0 && (
-          <List sx={{ maxHeight: 150, overflowY: 'auto', mb: 2 }}>
-            {filteredNicknames.map((friend, index) => (
-              <ListItem
-                key={index}
+      {search && (
+        <List>
+          {members
+            .filter((member) => member.nick.includes(search))
+            .map((member, index) => (
+              <ListItem key={index}
                 secondaryAction={
-                  <IconButton edge="end" onClick={() => onInvite(friend)}>
-                    <AddIcon />
-                  </IconButton>
+                  member.invited ? (
+                    <IconButton edge="end" disabled>
+                      <CheckCircleIcon color="success" />
+                    </IconButton>
+                  ) : (
+                    <IconButton edge="end" onClick={() => handleInviteClick(member.id)}>
+                      <AddIcon />
+                    </IconButton>
+                  )
                 }
               >
-                <ListItemText primary={friend.name} />
+                <ListItemAvatar>
+                  <Avatar src={member.profile} alt={`${member.nick}의 프로필`} />
+                </ListItemAvatar>
+                <ListItemText primary={member.nick} />
               </ListItem>
             ))}
-          </List>
-        )}
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-          {invitedNicknames.map((nickname, index) => (
-            <Chip key={index} label={nickname} color="primary" />
-          ))}
-        </Box>
-      </Box>
+        </List>
+      )}
     </>
   );
 }

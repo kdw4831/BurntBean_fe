@@ -3,11 +3,11 @@ import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import {  useNavigate } from 'react-router-dom';
 import { useMember } from '../contexts/MemberContext';
-import {axiosClient} from '../utils/axiosClient'
+
 
 const GoogleLoginButton = () => {
     const navigate= useNavigate();
-    const { setId, setNick, setName } = useMember(); // MemberContext의 setter 함수를 가져옴
+    const { setMeId, setNick, setName } = useMember(); // MemberContext의 setter 함수를 가져옴
 
 
     const handleSuccess = async (response) => {
@@ -30,7 +30,7 @@ const GoogleLoginButton = () => {
             });
 
             const { id, nick, name } = memberData.data;
-            setId(id);
+            setMeId(id);
             setNick(nick);
             setName(name);
 

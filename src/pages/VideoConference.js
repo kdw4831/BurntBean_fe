@@ -4,7 +4,7 @@ import { useGroup } from '../contexts/GroupContext';
 import { useMember } from '../contexts/MemberContext';
 
 const VideoConference = () => {
-    const {groupName,id} = useGroup()
+    const {groupName,groupId} = useGroup()
     const {nick} = useMember()
     
 
@@ -12,7 +12,7 @@ const VideoConference = () => {
         <div style={{ height: '100vh', width: '100%' }}>
             <JitsiMeeting
                 domain="jitsi.burntbean.site"
-                roomName={`${groupName}__${id}`}
+                roomName={`${groupName}__${groupId}`}
                 configOverwrite={{
                     startWithAudioMuted: true,
                     startWithVideoMuted: true,

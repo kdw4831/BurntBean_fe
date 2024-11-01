@@ -6,12 +6,18 @@ import { grey } from '@mui/material/colors';
 import { Stomp } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { useMember } from '../contexts/MemberContext';
+import { useGroupNotification } from '../contexts/GroupNotificationContext';
+import { useNavigate } from 'react-router-dom';
+import { useGroup } from '../contexts/GroupContext';
 
 const GroupWaitingPage = () => {
   const [invitations, setInvitations] = useState([]);
   const socketUrl = 'http://localhost:9000/ws'; // WebSocket 엔드포인트 URL
-  const { id } = useMember();
-  let myId = id;
+  const {invitationAccept } = useGroupNotification();
+  const { meId } = useMember();
+  const navigate= useNavigate();
+  const { setGroupId, setGroupName, setTotal } = useGroup(); 
+
 
   useEffect(() => {
     const fetchInvitations = async () => {
@@ -29,7 +35,7 @@ const GroupWaitingPage = () => {
     const stompClient = Stomp.over(socketFactory);
 
     stompClient.connect({}, () => {
-      stompClient.subscribe(`/queue/notification/${myId}`, () => {
+      stompClient.subscribe(`/queue/notification/${meId}`, () => {
         fetchInvitations(); // 초대 알림 수신 시 데이터를 다시 가져옴
       });
     });
@@ -39,17 +45,34 @@ const GroupWaitingPage = () => {
         stompClient.disconnect();
       }
     };
-  }, [myId]);
+  }, [meId]);
 
   const handleAcceptInvitation = async (roomId) => {
     try {
       await axiosClient.get(`/room/request/accept?roomId=${roomId}`);
       // 참여 성공 후 다시 데이터를 불러옵니다.
       setInvitations((prev) => prev.filter((invite) => invite.id !== roomId));
+      invitationAccept()
+
+      const res= await axiosClient.get(`/room/detail/${roomId}`)
+      setGroupId(res.data.id)
+      setGroupName(res.data.groupName)
+      setTotal(res.data.total)
+      navigate(`/chat`);
+    
     } catch (error) {
       console.error('Error accepting invitation:', error);
     }
   };
+
+  const handleRejectInvitation = async (roomId)=>{
+    try{
+      await axiosClient.delete(`/room/request/reject?roomId=${roomId}`);
+      setInvitations((prev) => prev.filter((invite) => invite.id !== roomId));
+    }catch(error){
+      console.error('Error rejecting invitation: ', error);
+    }
+  }
 
   return (
     <Box sx={{ p: 3 }}>
@@ -60,7 +83,7 @@ const GroupWaitingPage = () => {
           현재 그룹초대 대기목록이 존재하지 않습니다.
         </Typography>
       ) : (
-        invitations.map((invite, index) => (
+        invitations.map((invite,index) => (
           <Paper key={index} sx={{ p: 2, mt: 2, display: 'flex', alignItems: 'center' }}>
             <Avatar sx={{ bgcolor: grey[500], marginRight: 2 }}>
               {invite.groupName[0]}
@@ -73,11 +96,15 @@ const GroupWaitingPage = () => {
                 variant="contained"
                 color="primary"
                 sx={{ mr: 1 }}
-                onClick={() => handleAcceptInvitation(invite.id)}
+                onClick={() =>{handleAcceptInvitation(invite.id)}}
               >
                 참여하기
               </Button>
-              <Button variant="outlined" color="secondary">
+              <Button 
+               variant="outlined"
+               color="secondary"
+               onClick={()=>{handleRejectInvitation(invite.id)}}
+              >
                 거절하기
               </Button>
             </Box>

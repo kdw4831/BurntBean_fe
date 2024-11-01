@@ -5,8 +5,8 @@ const GroupContext = createContext();
 
 // Context를 제공하는 Provider 컴포넌트
 export const GroupProvider = ({ children }) => {
-    const [id, setId] = useState(() => {
-        const savedId = localStorage.getItem('id');
+    const [groupId, setGroupId] = useState(() => {
+        const savedId = localStorage.getItem('groupId');
         return savedId ? JSON.parse(savedId) : null;
     });
 
@@ -20,10 +20,20 @@ export const GroupProvider = ({ children }) => {
         return savedTotal ? JSON.parse(savedTotal) : 0;
     });
 
-    // id, groupName, total이 변경될 때마다 localStorage에 저장
+    const [rtype, setRtype] = useState(() => {
+        const savedRtype = localStorage.getItem('rtype');
+        return savedRtype ? JSON.parse(savedRtype) : 'group'; // 기본값을 'group'으로 설정
+    });
+
+    const [members, setMembers] = useState(() => {
+        const savedMembers = localStorage.getItem('members');
+        return savedMembers ? JSON.parse(savedMembers) : []; // 기본값을 빈 배열로 설정
+    });
+
+    // groupId, groupName, total, rtype, members가 변경될 때마다 localStorage에 저장
     useEffect(() => {
-        localStorage.setItem('id', JSON.stringify(id));
-    }, [id]);
+        localStorage.setItem('groupId', JSON.stringify(groupId));
+    }, [groupId]);
 
     useEffect(() => {
         localStorage.setItem('groupName', JSON.stringify(groupName));
@@ -33,8 +43,16 @@ export const GroupProvider = ({ children }) => {
         localStorage.setItem('total', JSON.stringify(total));
     }, [total]);
 
+    useEffect(() => {
+        localStorage.setItem('rtype', JSON.stringify(rtype));
+    }, [rtype]);
+
+    useEffect(() => {
+        localStorage.setItem('members', JSON.stringify(members));
+    }, [members]);
+
     return (
-        <GroupContext.Provider value={{ id, setId, groupName, setGroupName, total, setTotal }}>
+        <GroupContext.Provider value={{ groupId, setGroupId, groupName, setGroupName, total, setTotal, rtype, setRtype, members, setMembers }}>
             {children}
         </GroupContext.Provider>
     );

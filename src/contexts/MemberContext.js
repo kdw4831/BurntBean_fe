@@ -5,8 +5,8 @@ const MemberContext = createContext();
 
 // MemberContext를 제공하는 Provider 컴포넌트
 export const MemberProvider = ({ children }) => {
-    const [id, setId] = useState(() => {
-        const savedId = localStorage.getItem('id');
+    const [meId, setMeId] = useState(() => {
+        const savedId = localStorage.getItem('meId');
         try {
             return savedId ? JSON.parse(savedId) : null;
         } catch (e) {
@@ -38,8 +38,8 @@ export const MemberProvider = ({ children }) => {
 
     // 상태값이 변경될 때마다 localStorage에 저장
     useEffect(() => {
-        localStorage.setItem('id', JSON.stringify(id));
-    }, [id]);
+        localStorage.setItem('meId', JSON.stringify(meId));
+    }, [meId]);
 
     useEffect(() => {
         localStorage.setItem('nick', JSON.stringify(nick));
@@ -50,7 +50,7 @@ export const MemberProvider = ({ children }) => {
     }, [name]);
 
     return (
-        <MemberContext.Provider value={{ id, setId, nick, setNick, name, setName }}>
+        <MemberContext.Provider value={{ meId, setMeId, nick, setNick, name, setName }}>
             {children}
         </MemberContext.Provider>
     );

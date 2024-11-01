@@ -1,38 +1,32 @@
-import * as React from 'react';
-import { styled, alpha } from '@mui/material/styles';
+import React, { useState } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import InputBase from '@mui/material/InputBase';
 import Badge from '@mui/material/Badge';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
-
-import SearchIcon from '@mui/icons-material/Search';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import MailIcon from '@mui/icons-material/Mail';
-import NotificationsIcon from '@mui/icons-material/Notifications';
 import MoreIcon from '@mui/icons-material/MoreVert';
-import NotificationListener from '../notification/NotificationListener';
-import { Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useGroup } from '../../contexts/GroupContext';
 import { useMember } from '../../contexts/MemberContext';
-import { Margin, MarginRounded } from '@mui/icons-material';
-
-
+import GroupNotificationListener from '../notification/GroupNotificationListener';
+import FriendNotificationListener from '../notification/FriendNotificationListener';
 
 export default function TopBar() {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
-  const navigate= useNavigate()
+  const navigate = useNavigate();
   const [isClicked, setIsClicked] = React.useState(false);
-  const {nick} = useMember();
+
+  const { groupName, rtype, members } = useGroup();
+  const { nick } = useMember();
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
-   
 
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -53,10 +47,25 @@ export default function TopBar() {
 
   const handleClick = () => {
     setIsClicked(true);
-    navigate('/');
     setTimeout(() => {
       setIsClicked(false);
     }, 200); // 효과 지속 시간 설정 (200ms)
+  };
+
+  // rtype에 따라 TopBar 제목 설정
+  const getTopBarTitle = () => {
+    if (rtype==null) return "화상콩"; // 메인일 때
+
+    if (rtype === "group") {
+      return groupName || "그룹 채팅"; // group일 때 groupName 표시
+    } else if (rtype === "dm") {
+      // dm일 때 상대방 친구의 닉네임 표시 (나를 제외한 나머지)
+      const friend = members?.find((member) => member.nick !== nick);
+      console.log("members : "+members)
+      return friend ? friend.nick : "1:1 채팅";
+    }
+
+    return "화상콩";
   };
 
   const menuId = 'primary-search-account-menu';
@@ -76,7 +85,6 @@ export default function TopBar() {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
       <MenuItem onClick={handleMenuClose}>{nick}님 환영해요!</MenuItem>
     </Menu>
   );
@@ -106,7 +114,7 @@ export default function TopBar() {
         </IconButton>
         <p>Messages</p>
       </MenuItem>
-   
+
       <MenuItem onClick={handleProfileMenuOpen}>
         <IconButton
           size="large"
@@ -124,43 +132,35 @@ export default function TopBar() {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static" sx={{bgcolor:"#3C3D37"}}> 
+      <AppBar position="static" sx={{ bgcolor: "#3C3D37" }}>
         <Toolbar>
-   
-        <Typography
-          variant="h6"
-          noWrap
-          component="div"
-          onClick={handleClick}
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            cursor: 'pointer',
-            color: isClicked ? '#ADD8E6' : 'inherit', // 클릭 시 색상 변경
-            transition: 'color 0.2s ease', // 부드러운 전환 효과
-          }}
-        >
-          화상콩 
-        </Typography>
-         
-      
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            onClick={handleClick}
+            sx={{
+              display: { xs: 'none', sm: 'block' },
+              cursor: 'pointer',
+              color: isClicked ? '#ADD8E6' : 'inherit',
+              transition: 'color 0.2s ease',
+            }}
+          >
+            {getTopBarTitle()}
+          </Typography>
+
           <Box sx={{ flexGrow: 1 }} />
 
-          <Button color="inherit" onClick={() => navigate('/group/wait')}>
-            그룹 대기
-          </Button>
-          <Button color="inherit" onClick={() => navigate('/friend/wait')}>
-            친구 대기
-          </Button>
+          <GroupNotificationListener />
+          <FriendNotificationListener />
+
           <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
             <IconButton size="large" aria-label="show 4 new mails" color="inherit">
               <Badge badgeContent={4} color="error">
                 <MailIcon />
               </Badge>
             </IconButton>
-       
-        
-              <NotificationListener/>
-        
+
             <IconButton
               size="large"
               edge="end"
