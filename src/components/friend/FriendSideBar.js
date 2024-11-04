@@ -30,7 +30,7 @@ function FriendSideBar() {
   }, [invitationCount]);
 
   useEffect(() => {
-    const socket = new SockJS('http://localhost:9000/ws');
+    const socket = new SockJS(process.env.REACT_APP_SOCAT_URL);
     const stompClient = Stomp.over(socket);
     stompClient.reconnectDelay = 5000;
 

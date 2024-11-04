@@ -27,7 +27,7 @@ const ChatRoom = () => {
   useEffect(() => {
     fetchMessages();
 
-    const socket = new SockJS("http://localhost:9000/ws");
+    const socket = new SockJS(process.env.REACT_APP_SOCAT_URL);
     const stomp = Stomp.over(socket);
 
     stomp.connect({}, () => {

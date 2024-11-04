@@ -3,6 +3,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import {  useNavigate } from 'react-router-dom';
 import { useMember } from '../contexts/MemberContext';
+import { axiosClient } from '../utils/axiosClient';
 
 
 const GoogleLoginButton = () => {
@@ -15,7 +16,7 @@ const GoogleLoginButton = () => {
 
         try {
             // 서버에 토큰을 전송하여 인증 처리
-            const result = await axios.post('http://localhost:9000/api/login/google', {
+            const result = await axiosClient.post('/login/google', {
                 idToken: response.credential
                 
             }, {
@@ -25,7 +26,7 @@ const GoogleLoginButton = () => {
             console.log('Server Response:', result.data);
 
             // 로그인 성공 후 사용자 정보를 가져옴
-            const memberData = await axios.get('http://localhost:9000/api/member/get_me', {
+            const memberData = await axiosClient.get('/member/get_me', {
                 withCredentials: true
             });
 

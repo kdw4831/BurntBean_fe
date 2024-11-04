@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom'; // useLocation 추가
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -20,6 +21,7 @@ export default function TopBar() {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const navigate = useNavigate();
+  const location = useLocation(); // 현재 경로 확인
   const [isClicked, setIsClicked] = React.useState(false);
 
   const { groupName, rtype, members } = useGroup();
@@ -52,19 +54,15 @@ export default function TopBar() {
     }, 200); // 효과 지속 시간 설정 (200ms)
   };
 
-  // rtype에 따라 TopBar 제목 설정
+  // 경로에 따라 TopBar 제목 설정
   const getTopBarTitle = () => {
-    if (rtype==null) return "화상콩"; // 메인일 때
-
+    if (location.pathname === "/") return "화상콩"; // 루트 경로일 때
     if (rtype === "group") {
-      return groupName || "그룹 채팅"; // group일 때 groupName 표시
+      return groupName || "그룹 채팅";
     } else if (rtype === "dm") {
-      // dm일 때 상대방 친구의 닉네임 표시 (나를 제외한 나머지)
       const friend = members?.find((member) => member.nick !== nick);
-      console.log("members : "+members)
       return friend ? friend.nick : "1:1 채팅";
     }
-
     return "화상콩";
   };
 

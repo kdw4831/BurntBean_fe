@@ -10,7 +10,7 @@ import { useFriendNotification } from '../contexts/FriendNotificationContext';
 
 const FriendWaitingPage = () => {
   const [invitations, setInvitations] = useState([]);
-  const socketUrl = 'http://localhost:9000/ws'; // WebSocket 엔드포인트 URL
+  const socketUrl = process.env.REACT_APP_SOCAT_URL; // WebSocket 엔드포인트 URL
   const {invitationAccept } = useFriendNotification();
   const { meId } = useMember();
   const nav =useNavigate();

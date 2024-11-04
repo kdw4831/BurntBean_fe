@@ -35,19 +35,19 @@ const NickInputModal = () => {
       setNickname('');
       setBirthdate(dayjs());
       setCompletionModal(true); // 제출 성공 시 완료 모달 띄우기
-
-
-        // 로그인 성공 후 사용자 정보를 가져옴
+  
+      // 로그인 성공 후 사용자 정보를 가져옴
       const memberData = await axiosClient.get('/member/get_me');
-
-      const { id, nick, name } = memberData.data;
+      const { id, nick: fetchedNick, name } = memberData.data; // 변수명 충돌 방지
+  
       setMeId(id);
-      setNick(nick);
+      setNick(fetchedNick);
       setName(name);
     } catch (error) {
       console.error('Error submitting data:', error);
     }
   };
+  
 
   const checkNicknameAvailability = async () => {
     try {
@@ -108,7 +108,6 @@ const NickInputModal = () => {
                 label="생년월일"
                 value={birth}
                 onChange={(newValue) => setBirthdate(newValue)}
-                disablePast
                 views={['year', 'month', 'day']}
               />
             </DemoContainer>
