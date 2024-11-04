@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom'; // useLocation 추가
+import { useLocation } from 'react-router-dom';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -16,13 +16,17 @@ import { useGroup } from '../../contexts/GroupContext';
 import { useMember } from '../../contexts/MemberContext';
 import GroupNotificationListener from '../notification/GroupNotificationListener';
 import FriendNotificationListener from '../notification/FriendNotificationListener';
+import Alert from '@mui/material/Alert';
+import Snackbar from '@mui/material/Snackbar';
 
 export default function TopBar() {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const navigate = useNavigate();
-  const location = useLocation(); // 현재 경로 확인
+  const location = useLocation();
   const [isClicked, setIsClicked] = React.useState(false);
+  const [messageCount, setMessageCount] = useState(0); // 메시지 개수 상태
+  const [alertOpen, setAlertOpen] = useState(false); // 알림 상태
 
   const { groupName, rtype, members } = useGroup();
   const { nick } = useMember();
@@ -48,15 +52,27 @@ export default function TopBar() {
   };
 
   const handleClick = () => {
+    if (getTopBarTitle() === "화상콩") {
+      navigate('/'); // "화상콩"일 때만 루트 경로로 이동
+    }
     setIsClicked(true);
     setTimeout(() => {
       setIsClicked(false);
-    }, 200); // 효과 지속 시간 설정 (200ms)
+    }, 200);
   };
 
-  // 경로에 따라 TopBar 제목 설정
+  const handleMailIconClick = () => {
+    if (messageCount === 0) {
+      setAlertOpen(true); // 메시지가 없으면 알림 열기
+    }
+  };
+
+  const handleAlertClose = () => {
+    setAlertOpen(false); // 알림 닫기
+  };
+
   const getTopBarTitle = () => {
-    if (location.pathname === "/") return "화상콩"; // 루트 경로일 때
+    if (location.pathname === "/" || location.pathname === "/group/wait" || location.pathname === "/friend/wait") return "화상콩";
     if (rtype === "group") {
       return groupName || "그룹 채팅";
     } else if (rtype === "dm") {
@@ -104,9 +120,9 @@ export default function TopBar() {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
-      <MenuItem>
-        <IconButton size="large" aria-label="show 4 new mails" color="inherit">
-          <Badge badgeContent={4} color="error">
+      <MenuItem onClick={handleMailIconClick}>
+        <IconButton size="large" aria-label="show new mails" color="inherit">
+          <Badge badgeContent={messageCount} color="error">
             <MailIcon />
           </Badge>
         </IconButton>
@@ -153,8 +169,8 @@ export default function TopBar() {
           <FriendNotificationListener />
 
           <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-            <IconButton size="large" aria-label="show 4 new mails" color="inherit">
-              <Badge badgeContent={4} color="error">
+            <IconButton size="large" aria-label="show new mails" color="inherit" onClick={handleMailIconClick}>
+              <Badge badgeContent={messageCount} color="error">
                 <MailIcon />
               </Badge>
             </IconButton>
@@ -187,6 +203,12 @@ export default function TopBar() {
       </AppBar>
       {renderMobileMenu}
       {renderMenu}
+      {/* 메시지가 없을 때 알림 표시 */}
+      <Snackbar open={alertOpen} autoHideDuration={3000} onClose={handleAlertClose}>
+        <Alert onClose={handleAlertClose} severity="info" sx={{ width: '100%' }}>
+          현재 메시지가 없습니다.
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

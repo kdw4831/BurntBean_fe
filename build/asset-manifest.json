@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/static/css/main.36c51c69.css",
-    "main.js": "/static/js/main.ad06a212.js",
+    "main.js": "/static/js/main.fef42fbe.js",
     "static/media/burntBean-login.webp": "/static/media/burntBean-login.dfff2ef06f5cea275c16.webp",
     "index.html": "/index.html",
     "main.36c51c69.css.map": "/static/css/main.36c51c69.css.map",
-    "main.ad06a212.js.map": "/static/js/main.ad06a212.js.map"
+    "main.fef42fbe.js.map": "/static/js/main.fef42fbe.js.map"
   },
   "entrypoints": [
     "static/css/main.36c51c69.css",
-    "static/js/main.ad06a212.js"
+    "static/js/main.fef42fbe.js"
   ]
 }
